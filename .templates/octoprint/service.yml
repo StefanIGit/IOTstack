@@ -9,6 +9,7 @@ octoprint:
   # - CAMERA_DEV=/dev/video0
   ports:
     - "9980:80"
+  x-homer-port: "9980"
   devices:
     - /dev/ttyAMA0:/dev/ttyACM0
   # - /dev/video0:/dev/video0

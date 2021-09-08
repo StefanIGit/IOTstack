@@ -6,6 +6,7 @@ pihole:
     - "53:53/tcp"
     - "53:53/udp"
     - "67:67/udp"
+  x-homer-port: "8089/admin"
   environment:
     - WEBPASSWORD=%randomAdminPassword%
     - INTERFACE=eth0

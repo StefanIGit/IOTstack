@@ -4,6 +4,7 @@ tasmoadmin:
   restart: unless-stopped
   ports:
     - "8088:80"
+  x-homer-port: "8088"
   volumes:
     - ./volumes/tasmoadmin/data:/data
   networks:

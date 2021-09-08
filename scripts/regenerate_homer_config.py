@@ -1,40 +1,30 @@
 #!/usr/bin/env python3
 
-issues = {} # Returned issues dict
-buildHooks = {} # Options, and others hooks
-haltOnErrors = True
-
 # Main wrapper function. Required to make local vars work correctly
 def main():
   import os
   import time
-  import ruamel.yaml
+  #import ruamel.yaml
+  import yaml
   import signal
   import sys
   from blessed import Terminal
   
   from deps.chars import specialChars, commonTopBorder, commonBottomBorder, commonEmptyLine
-  from deps.consts import volumesDirectory, servicesDirectory, templatesDirectory, buildSettingsFileName, buildCache, servicesFileName
+  from deps.consts import dockerPathOutput, volumesDirectory, servicesDirectory, templatesDirectory, buildSettingsFileName, buildCache, servicesFileName
   from deps.common_functions import getExternalPorts, getInternalPorts, checkPortConflicts, enterPortNumberWithWhiptail, generateRandomString
 
-  yaml = ruamel.yaml.YAML()
-  yaml.preserve_quotes = True
-
-  global toRun # Switch for which function to run when executed
-  global buildHooks # Where to place the options menu result
-  global issues # Returned issues dict
-  global haltOnErrors # Turn on to allow erroring
+  # yaml = ruamel.yaml.YAML()
+  # yaml.preserve_quotes = True
 
   # runtime vars
-  portConflicts = []
   currentServiceName = 'homer'
   serviceVolume = volumesDirectory + currentServiceName  + '/'
-  serviceService = servicesDirectory + currentServiceName  + '/'
   serviceTemplate = templatesDirectory + currentServiceName  + '/'
   serviceConfigFile = 'config.dist.yml'
 
 
-  with open(buildCache) as objdockerComposeServicesFile:
+  with open(dockerPathOutput) as objdockerComposeServicesFile:
       dockerComposeServicesYaml = yaml.load(objdockerComposeServicesFile)
   
   with open(serviceTemplate + serviceConfigFile) as objServiceConfigFile:
@@ -43,19 +33,20 @@ def main():
   ipOfHost = get_ip_address()
 
   listOfApplication = []
-  # TODO: one way to only like http urls but the list must be maintained
-  # and is not 100% http
-  listOfKnownWebPorts = ['80', '80/tcp', '9000']
-  for service in dockerComposeServicesYaml['services']:
-      portsList = dockerComposeServicesYaml['services'][service]['ports']
-      ports = [ x.split(':')[0] for x in portsList]
-      for port in portsList:
-        spitttedPort = port.split(':')
-        if spitttedPort[1] in listOfKnownWebPorts:
-          httpPort = spitttedPort[0]
-
+  # TODO: nicer version, more changed files... ok but need more
+  
+  for currentServiceName in dockerComposeServicesYaml['services']:
+      with open(templatesDirectory + currentServiceName + '/service.yml') as objServiceConfigFile:
+        serviceFile = yaml.load(objServiceConfigFile)
+      # TODO: figure out how this works with ruaml... or not who cares about the file layou since it is overwritten on every run
+      if 'x-homer-port' in serviceFile[currentServiceName].keys():
+        httpPort = serviceFile[currentServiceName]['x-homer-port']
+        portsList = serviceFile[currentServiceName]['ports']
+        ports = [ x.split(':')[0] for x in portsList]
+      else:
+        continue
       listOfApplication.append({
-      'name':service,
+      'name':currentServiceName,
       'logo':'assets/tools/sample.png',
       'subtitle': ipOfHost + ':'+ (' ' + ipOfHost + ':').join(ports),
       'tag': "http://" + ipOfHost + ':'+ str(httpPort),

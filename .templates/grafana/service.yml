@@ -5,6 +5,7 @@ grafana:
   user: "0"
   ports:
     - "3000:3000"
+  x-homer-port: "3000"
   environment:
     - GF_PATHS_DATA=/var/lib/grafana
     - GF_PATHS_LOGS=/var/log/grafana

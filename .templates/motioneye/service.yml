@@ -5,6 +5,7 @@ motioneye:
   ports:
     - "8765:8765"
     - "8081:8081"
+  x-homer-port: "8081"
   volumes:
     - /etc/localtime:/etc/localtime:ro
     - ./volumes/motioneye/etc_motioneye:/etc/motioneye
