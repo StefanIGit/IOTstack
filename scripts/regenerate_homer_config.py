@@ -43,15 +43,23 @@ def main():
   ipOfHost = get_ip_address()
 
   listOfApplication = []
-  # TODO: find a why to only like http urls
+  # TODO: one way to only like http urls but the list must be maintained
+  # and is not 100% http
+  listOfKnownWebPorts = ['80', '80/tcp', '9000']
   for service in dockerComposeServicesYaml['services']:
-      ports = [ x.split(':')[0] for x in dockerComposeServicesYaml['services'][service]['ports']]
+      portsList = dockerComposeServicesYaml['services'][service]['ports']
+      ports = [ x.split(':')[0] for x in portsList]
+      for port in portsList:
+        spitttedPort = port.split(':')
+        if spitttedPort[1] in listOfKnownWebPorts:
+          httpPort = spitttedPort[0]
+
       listOfApplication.append({
       'name':service,
       'logo':'assets/tools/sample.png',
-      'subtitle': (' ' + ipOfHost + ':').join(ports),
-      'tag': "http://" + ipOfHost + ':'+ dockerComposeServicesYaml['services'][service]['ports'][0].split(':')[0],
-      'url': "http://" + ipOfHost + ':'+ dockerComposeServicesYaml['services'][service]['ports'][0].split(':')[0],
+      'subtitle': ipOfHost + ':'+ (' ' + ipOfHost + ':').join(ports),
+      'tag': "http://" + ipOfHost + ':'+ str(httpPort),
+      'url': "http://" + ipOfHost + ':'+ str(httpPort),
       #'target': "_blank" # optional html a tag target attribute
   } )
 
